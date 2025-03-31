@@ -1,0 +1,127 @@
+<!DOCTYPE html><html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Favorite Playlist</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(45deg, #ff6b6b, #6b6bff);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 80%;
+            max-width: 600px;
+        }
+        input, button {
+            margin: 10px 0;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+        }
+        #addPlaylistBtn {
+            background: linear-gradient(45deg, #00c6ff, #0072ff);
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 12px;
+            padding: 5px 10px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        .playlist-item {
+            display: flex;
+            flex-direction: column;
+            background: #333;
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            align-items: center;
+        }
+        .playlist-item img {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="mainContainer">
+        <button id="addPlaylistBtn" onclick="toggleForm()">+ प्लेलिस्ट</button>
+        <div id="formContainer" style="display: none;">
+            <h2>अपनी पसंदीदा प्लेलिस्ट जोड़ें</h2>
+            <input type="text" id="playlistName" placeholder="प्लेलिस्ट नाम डालें">
+            <input type="url" id="youtubeUrl" placeholder="YouTube प्लेलिस्ट URL डालें">
+            <input type="file" id="thumbnailInput" accept="image/*">
+            <button onclick="addPlaylist()">सेव करें</button>
+        </div>
+        <div id="playlistContainer"></div>
+    </div><script>
+    document.addEventListener("DOMContentLoaded", loadPlaylists);
+    
+    function toggleForm() {
+        let form = document.getElementById("formContainer");
+        form.style.display = form.style.display === "none" ? "block" : "none";
+    }
+
+    function addPlaylist() {
+        let name = document.getElementById("playlistName").value;
+        let youtubeUrl = document.getElementById("youtubeUrl").value;
+        let thumbnailInput = document.getElementById("thumbnailInput").files[0];
+        
+        if (!name || !youtubeUrl || !thumbnailInput) {
+            alert("कृपया सभी फ़ील्ड भरें");
+            return;
+        }
+        
+        let reader = new FileReader();
+        reader.onload = function(event) {
+            let playlists = JSON.parse(localStorage.getItem("playlists")) || [];
+            playlists.push({ name, youtubeUrl, thumbnail: event.target.result });
+            localStorage.setItem("playlists", JSON.stringify(playlists));
+            loadPlaylists();
+            document.getElementById("formContainer").style.display = "none";
+        };
+        reader.readAsDataURL(thumbnailInput);
+    }
+
+    function loadPlaylists() {
+        let playlistContainer = document.getElementById("playlistContainer");
+        playlistContainer.innerHTML = "";
+        let playlists = JSON.parse(localStorage.getItem("playlists")) || [];
+        playlists.forEach((playlist, index) => {
+            let playlistItem = document.createElement("div");
+            playlistItem.className = "playlist-item";
+            playlistItem.innerHTML = `
+                <img src="${playlist.thumbnail}" alt="Thumbnail"> 
+                <span>${playlist.name}</span>
+            `;
+            playlistItem.onclick = function() {
+                openPlaylist(playlist);
+            };
+            playlistContainer.appendChild(playlistItem);
+        });
+    }
+
+    function openPlaylist(playlist) {
+        window.open(playlist.youtubeUrl, "_blank");
+    }
+</script>
+
+</body>
+</html>
